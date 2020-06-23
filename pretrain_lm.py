@@ -186,7 +186,7 @@ class LanguageModel(object):
                     tb_writer.add_scalar('stats/loss', loss_value, step)
 
             # Save periodically so we don't have to wait for epoch to finish
-            save_every = nbatches // 10
+            save_every = nbatches // 5
             if save_every != 0 and s_idx % save_every == 0:
                 save_model(self.save_dir, self.model, self.optimizer, epoch, self.opt, 'intermediate')
 
@@ -205,10 +205,11 @@ class LanguageModel(object):
 
         self.dataset = SummDatasetFactory.get(self.opt.dataset)
         subwordenc = self.dataset.subwordenc
-        train_iter = self.dataset.get_data_loader(split='train', n_docs=self.hp.n_docs, sample_reviews=True,
+        train_iter = self.dataset.get_data_loader(split='lm', n_docs=self.hp.n_docs, sample_reviews=True,
                                                   batch_size=self.hp.batch_size, shuffle=True)
         train_nbatches = train_iter.__len__()
-        val_iter = self.dataset.get_data_loader(split='val', n_docs=self.hp.n_docs, sample_reviews=False,
+        val_iter = self.dataset.get_data_loader(split='lm', n_docs=self.hp.n_docs, sample_reviews=False,
+                                                subset=0.01,
                                                 batch_size=self.hp.batch_size, shuffle=False)
         val_nbatches = val_iter.__len__()
 

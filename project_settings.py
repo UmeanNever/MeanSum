@@ -43,7 +43,7 @@ class DatasetConfig(object):
                             'batch_size_16-notes_cycloss_honly-sum_lr_0.0005-tau_2.0/' \
                             'sum_e0_tot3.32_r1f0.27.pt'
             self.autoenc_path = 'stable_checkpoints/sum/mlstm/yelp/' \
-                    'autoenc_only_True-batch_size_16-sum_cycle_False-sum_lr_0.0005-tau_2.0/sum_e22_tot2.16_r1f0.03.pt'
+                                'autoenc_only_True-batch_size_16-sum_cycle_False-sum_lr_0.0005-tau_2.0/sum_e22_tot2.16_r1f0.03.pt'
 
         elif name == 'amazon':
             # Params
@@ -64,6 +64,70 @@ class DatasetConfig(object):
                             'clf_e15_l0.7415_a0.7115_d0.0000.pt'
             self.sum_path = 'stable_checkpoints/sum/mlstm/amazon/batch_size_16-notes_both-sum_lr_0.0005-tau_2.0/' \
                             'sum_e1_tot4.14_r1f0.26.pt'
+            self.autoenc_path = None
+
+        elif name == 'my':
+            self.review_max_len = 150
+            self.item_max_reviews = 260
+
+            # self.vocab_size = 32000
+            # self.dir_path = 'datasets/my_yelp_dataset/'
+            # self.csv_path = 'datasets/my_yelp_dataset/sentence_by_topic.csv'
+
+            # self.sum_path = 'stable_checkpoints/sum/mlstm/my/batch_size_4-n_docs_20-notes_my1/sum_e49_tot0.80_r1f0.16.pt'
+            # self.subwordenc_path = 'datasets/yelp_dataset/processed/subwordenc_32000_maxrevs260_fixed.pkl'
+            # self.lm_path = 'stable_checkpoints/lm/mlstm/yelp/batch_size_512-lm_lr_0.001-notes_data260_fixed/' \
+            #                'lm_e24_2.88.pt'
+            # self.clf_path = None
+            # self.autoenc_path = None
+
+            self.vocab_size = 10035
+            self.dir_path = 'datasets/my_yelp2_dataset/'
+            self.csv_path = 'datasets/my_yelp2_dataset/sentence_by_50topic.csv'
+            self.npy_path = 'datasets/my_yelp2_dataset/all_sentences.npy'
+            # self.sum_path = 'stable_checkpoints/sum/mlstm/my/batch_size_4-n_docs_12-notes_yelp2_largelm_2-sum_lr_0.0001/sum_e49_tot0.24_r1f0.16.pt'
+            self.sum_path = 'stable_checkpoints/sum/mlstm/my/batch_size_4-n_docs_10-notes_yelp2_largelm_3-sum_lr_0.0005/sum_e49_tot-0.68_r1f0.17.pt'
+            # self.sum_path = None
+            self.subwordenc_path = 'datasets/my_yelp2_dataset/subwordenc.pkl'
+            # self.subwordenc_path = 'datasets/yelp_dataset/processed/subwordenc_32000_maxrevs260_fixed.pkl'
+            self.lm_path = 'stable_checkpoints/lm/mlstm/my_yelp2/batch_size_128-lm_lr_0.002-max_nepochs_100-notes_yelp2_large/lm_e99_1.25.pt'
+            # self.lm_path = 'stable_checkpoints/lm/mlstm/yelp/batch_size_512-lm_lr_0.001-notes_data260_fixed/' \
+            #                'lm_e24_2.88.pt'
+            # self.lm_path = None
+            self.clf_path = None
+            self.autoenc_path = None
+
+        elif name == 'schwab':
+            self.review_max_len = 150
+            self.item_max_reviews = 260
+
+            self.vocab_size = 9785
+            self.dir_path = 'datasets/my_schwab2_dataset/'
+            self.csv_path = 'datasets/my_schwab2_dataset/sentence_by_50topic.csv'
+            self.npy_path = 'datasets/my_schwab2_dataset/all_sentences.npy'
+
+            self.sum_path = 'stable_checkpoints/sum/mlstm/my_schwab2/batch_size_4-n_docs_10-notes_schwab2_large-sum_lr_0.0005/sum_e48_tot-0.71_r1f0.16.pt'
+            # self.sum_path = None
+            self.subwordenc_path = 'datasets/my_schwab2_dataset/subwordenc.pkl'
+            self.lm_path = 'stable_checkpoints/lm/mlstm/my_schwab2/batch_size_128-lm_lr_0.001-max_nepochs_100-notes_schwab2_large/lm_e99_0.81.pt'
+            # self.lm_path = None
+            self.clf_path = None
+            self.autoenc_path = None
+
+        elif name == 'twitter':
+            self.review_max_len = 150
+            self.item_max_reviews = 260
+
+            self.vocab_size = 9958
+            self.dir_path = 'datasets/my_twitter_dataset/'
+            self.csv_path = 'datasets/my_twitter_dataset/sentence_by_50topic.csv'
+            self.npy_path = 'datasets/my_twitter_dataset/all_sentences.npy'
+            # self.sum_path = 'stable_checkpoints/sum/mlstm/my/batch_size_4-n_docs_10-notes_my5-sum_lr_0.001/sum_e43_tot0.07_r1f0.14.pt'
+            self.sum_path = None
+            self.subwordenc_path = 'datasets/my_twitter_dataset/subwordenc.pkl'
+            # self.lm_path = 'stable_checkpoints/lm/mlstm/my/lm_e44_2.12.pt'
+            self.lm_path = None
+            self.clf_path = None
             self.autoenc_path = None
 
 
@@ -129,7 +193,7 @@ class HParams(object):
         self.discrim_model = 'cnn'
         self.discrim_onehot = True
 
-        self.sum_clf = True  # calculate classification loss and accuracy
+        self.sum_clf = False  # calculate classification loss and accuracy
         self.sum_clf_lr = 0.0  # when 0, don't backwards() etc
 
         self.sum_lr = 0.0001

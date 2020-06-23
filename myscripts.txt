@@ -1,0 +1,11 @@
+sudo chmod -R a+w my
+
+docker run -it --rm --gpus=all -v $PWD:/app meansum:origin
+
+python -m data_loaders.build_subword_encoder --dataset=twitter --target_size=10000
+更改subwordenc路径htop
+python pretrain_lm.py --dataset=twitter --batch_size=128 --lm_lr=0.0005 --max_nepochs=100 --notes=twitter_large
+更改lm的checkpoint位置
+python train_sum.py --dataset=twitter --batch_size=4 --gpus=0 --n_docs=10 --sum_lr=0.0005 --notes=twitter_large
+更改sum的checkpoint位置
+python train_sum.py --mode=test --dataset=twitter --gpus=0 --batch_size=4 --n_docs=10 --notes=twitter_large

@@ -201,7 +201,7 @@ def save_run_data(path_to_dir, hp):
             print('Exiting')
             raise SystemExit
     print('Creating directory and saving data')
-    os.mkdir(path_to_dir)
+    os.makedirs(path_to_dir)
 
     # Redirect stdout (print statements) to file
     # if not hp.debug:

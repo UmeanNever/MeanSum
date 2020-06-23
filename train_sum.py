@@ -314,7 +314,6 @@ class Summarizer(object):
             ppl_time = time.time() - ppl_time
             stats['nll'] = nll
 
-
             #
             # Stats, print, etc.
             #
@@ -369,7 +368,6 @@ class Summarizer(object):
                 print('-' * 100)
                 print('SUMMARY: ', summ_texts[0].encode('utf8'))
                 print('-' * 100, '\n')
-
 
                 print('\n', '#' * 100, '\n')
 
@@ -440,6 +438,7 @@ class Summarizer(object):
                                                   batch_size=self.hp.batch_size, shuffle=True)
         val_iter = self.dataset.get_data_loader(split='val', n_docs=self.hp.n_docs, sample_reviews=False,
                                                 category=self.opt.az_cat,
+                                                # subset=0.1,
                                                 batch_size=self.hp.batch_size, shuffle=False)
         val_subset_iter = self.dataset.get_data_loader(split='val', n_docs=self.hp.n_docs, sample_reviews=False,
                                                        category=self.opt.az_cat,
@@ -724,7 +723,8 @@ class Summarizer(object):
                     discrim_optimizer=self.discrim_optimizer,
                     clf_optimizer=self.clf_optimizer,
                     # cpkt_every=5, save_intermediate=True, run_val_subset=True,
-                    cpkt_every=int(nbatches / 10), save_intermediate=True, run_val_subset=True,
+                    # cpkt_every=int(nbatches / 10), save_intermediate=True, run_val_subset=True,
+                    cpkt_every=max(int(nbatches / 10), 1), save_intermediate=False, run_val_subset=False,
                     tb_writer=self.tb_tr_writer)
 
                 for k, v in stats_avgs.items():
@@ -777,16 +777,16 @@ class Summarizer(object):
                     metadata = {'item': ['SqxIx0KbTmCvUlOfkjamew'],
                                 'categories': ['Restaurants---Vegan---Thai'],
                                 'city': ['Las Vegas']}
-                    yield(texts, ratings, metadata)
+                    yield (texts, ratings, metadata)
+
             self.hp.batch_size = 1
-            test_iter  = grouped_reviews_iter(self.hp.n_docs)
+            test_iter = grouped_reviews_iter(self.hp.n_docs)
             test_iter_len = 3
         else:
             test_iter = self.dataset.get_data_loader(split='test', sample_reviews=False, n_docs=self.hp.n_docs,
                                                      category=self.opt.az_cat,
                                                      batch_size=self.hp.batch_size, shuffle=False)
             test_iter_len = test_iter.__len__()
-
 
         self.tb_val_sub_writer = None
 
@@ -808,7 +808,6 @@ class Summarizer(object):
         self.fixed_lm = torch.load(self.dataset.conf.lm_path)['model']  # StackedLSTMEncoder
         self.fixed_lm = self.fixed_lm.module if isinstance(self.fixed_lm, nn.DataParallel) \
             else self.fixed_lm
-
 
         # Adding this now for backwards compatability
         # Was testing with a model that didn't have early_cycle
@@ -871,7 +870,7 @@ class Summarizer(object):
         per_rating_acc = defaultdict(int)
         clf_model = self.sum_model.module.clf_model if self.ngpus > 1 else self.sum_model.clf_model
         if self.opt.test_group_ratings:
-            test_iter  = grouped_reviews_iter(self.hp.n_docs)
+            test_iter = grouped_reviews_iter(self.hp.n_docs)
         for i, (texts, ratings_batch, metadata) in enumerate(test_iter):
             summaries_batch = summaries[i * self.hp.batch_size: i * self.hp.batch_size + len(texts)]
             acc, per_rating_counts, per_rating_acc, pred_ratings, pred_probs = \
@@ -892,8 +891,8 @@ class Summarizer(object):
                 dic = {'docs': texts[j],
                        'summary': summaries_batch[j],
                        'rating': ratings_batch[j].item(),
-                       'pred_rating': pred_ratings[j].item(),
-                       'pred_prob': pred_probs[j].item()}
+                       'pred_rating': pred_ratings[j].item() if pred_ratings[j] is not None else pred_ratings[j],
+                       'pred_prob': pred_probs[j].item() if pred_probs[j] is not None else pred_probs[j]}
                 for k, values in metadata.items():
                     dic[k] = values[j]
                 results.append(dic)
@@ -940,7 +939,7 @@ if __name__ == '__main__':
     hp = HParams()
     hp, run_name, parser = create_argparse_and_update_hp(hp)
 
-    parser.add_argument('--dataset', default='yelp',
+    parser.add_argument('--dataset', default='my',
                         help='yelp,amazon')
     parser.add_argument('--az_cat', default=None,
                         help='"Movies_and_TV" or "Electronics"'

@@ -1,0 +1,7 @@
+checkpoints/
+stable_checkpoints/
+outputs/
+datasets/
+
+*.pyc
+.idea/
