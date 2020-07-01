@@ -3,6 +3,7 @@ from torch.utils.data.sampler import Sampler
 
 from data_loaders.summ_dataset import SummReviewDataset, SummDataset
 from project_settings import HParams, DatasetConfig
+from data_loaders.extra_word_filter import ExtraWordFilter
 
 import pandas as pd
 import numpy as np
@@ -34,10 +35,16 @@ class MyPytorchDataset(Dataset):
                 new_size = max(int(len(self.reviews) * subset), 1)
                 self.reviews = self.reviews[:new_size]
         self.n = len(self.reviews)
+        if split != 'lm':
+            self.extra_word_filter = ExtraWordFilter()
+            self.filtered_reviews = self.extra_word_filter.fit_transform(self.reviews, no_above=0.1, no_below=1)
+        else:
+            self.filtered_reviews = self.reviews
 
     def __getitem__(self, idx):
         texts = SummDataset.concat_docs(self.reviews[idx], edok_token=True)
-        return texts, 1, {'Topic': self.id_to_key[idx]}
+        filtered_texts = SummDataset.concat_docs(self.filtered_reviews[idx], edok_token=True)
+        return texts, 1, {'Topic': self.id_to_key[idx], 'Filtered_Text': filtered_texts}
 
     def __len__(self):
         return self.n
@@ -75,3 +82,5 @@ class MyDataset(SummReviewDataset):
         else:
             loader = DataLoader(ds, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
         return loader
+
+

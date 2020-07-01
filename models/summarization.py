@@ -48,7 +48,7 @@ class SummarizationModel(nn.Module):
 
         self.stats = {}
 
-    def forward(self, docs_ids, labels,
+    def forward(self, docs_ids, labels, full_doc_ids,
                 cycle_tgt_ids=None,
                 extract_summ_ids=None,
                 tau=None,
@@ -99,7 +99,9 @@ class SummarizationModel(nn.Module):
                 if docs_ids.get_device() == 0:
                     print('\n', '-' * 100)
                     orig_rev_text = self.dataset.subwordenc.decode(docs_ids[0][0])
+                    orig_full_text = self.dataset.subwordenc.decode(full_doc_ids[0][0])
                     print('ORIGINAL REVIEW: ', orig_rev_text.encode('utf8'))
+                    print('ORIGINAL FULL REVIEW: ', orig_full_text.encode('utf8'))
                     print('-' * 100)
                     if tb_writer:
                         tb_writer.add_text('auto_or_rec/orig_review', orig_rev_text, tb_step)
@@ -107,6 +109,7 @@ class SummarizationModel(nn.Module):
         if not self.hp.concat_docs:
             n_docs = docs_ids.size(1)  # TODO: need to get data loader to choose items with same n_docs
             docs_ids = docs_ids.view(-1, docs_ids.size(-1))  # [batch * n_docs, len]
+            full_doc_ids = full_doc_ids.view(-1, full_doc_ids.size(-1))
 
         h_init, c_init = self.docs_enc.rnn.state0(docs_ids.size(0))
         h_init, c_init = move_to_cuda(h_init), move_to_cuda(c_init)
@@ -124,7 +127,7 @@ class SummarizationModel(nn.Module):
             init_input = torch.LongTensor([EDOC_ID for _ in range(docs_enc_h.size(0))])  # batch * n_docs
             init_input = move_to_cuda(init_input)
             docs_autodec_probs, _, docs_autodec_texts, _ = self.docs_autodec(docs_enc_h, docs_enc_c, init_input,
-                                                                             targets=docs_ids,
+                                                                             targets=full_doc_ids,
                                                                              eos_id=EDOC_ID, non_pad_prob_val=1e-14,
                                                                              softmax_method='softmax',
                                                                              sample_method='greedy',
@@ -133,7 +136,7 @@ class SummarizationModel(nn.Module):
 
             docs_autodec_logprobs = torch.log(docs_autodec_probs)
             autoenc_loss = self.rec_crit(docs_autodec_logprobs.view(-1, docs_autodec_logprobs.size(-1)),
-                                         docs_ids.view(-1))
+                                         full_doc_ids.view(-1))
             if self.hp.sum_label_smooth:
                 autoenc_loss /= (docs_ids != move_to_cuda(torch.tensor(PAD_ID))).sum().float()
             self.stats['autoenc_loss'] = autoenc_loss

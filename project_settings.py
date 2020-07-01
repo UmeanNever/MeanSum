@@ -120,13 +120,13 @@ class DatasetConfig(object):
 
             self.vocab_size = 9958
             self.dir_path = 'datasets/my_twitter_dataset/'
-            self.csv_path = 'datasets/my_twitter_dataset/sentence_by_50topic.csv'
+            self.csv_path = 'datasets/my_twitter_dataset/sentence_by_16topic.csv'
             self.npy_path = 'datasets/my_twitter_dataset/all_sentences.npy'
-            # self.sum_path = 'stable_checkpoints/sum/mlstm/my/batch_size_4-n_docs_10-notes_my5-sum_lr_0.001/sum_e43_tot0.07_r1f0.14.pt'
-            self.sum_path = None
+            self.sum_path = 'stable_checkpoints/sum/mlstm/twitter/batch_size_4-n_docs_10-notes_twitter_filter-sum_lr_0.0005/sum_e39_tot-0.66_r1f0.19.pt'
+            # self.sum_path = None
             self.subwordenc_path = 'datasets/my_twitter_dataset/subwordenc.pkl'
-            # self.lm_path = 'stable_checkpoints/lm/mlstm/my/lm_e44_2.12.pt'
-            self.lm_path = None
+            self.lm_path = 'stable_checkpoints/lm/mlstm/twitter/batch_size_128-lm_lr_0.0005-max_nepochs_100-notes_twitter_large/lm_e99_0.81.pt'
+            # self.lm_path = None
             self.clf_path = None
             self.autoenc_path = None
 

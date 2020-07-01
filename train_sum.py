@@ -152,6 +152,7 @@ class Summarizer(object):
             if s > nbatches:
                 break
 
+            filtered_texts = metadata['Filtered_Text']
             stats = {}
             start = time.time()
 
@@ -166,11 +167,13 @@ class Summarizer(object):
             cycle_tgt_ids = None
             if self.hp.concat_docs:
                 docs_ids, _, labels = self.dataset.prepare_batch(texts, ratings, doc_append_id=EDOC_ID)
+                filtered_doc_ids, _, _ = self.dataset.prepare_batch(filtered_texts, ratings, doc_append_id=EDOC_ID)
                 # docs_ids: [batch_size, max_len]
                 if self.sum_cycle and (self.cycle_loss == 'rec'):
                     cycle_tgt_ids = self.prepare_individual_revs(texts)
             else:
                 docs_ids = self.prepare_individual_revs(texts, append_edoc=True)
+                filtered_doc_ids = self.prepare_individual_revs(filtered_texts, append_edoc=True)
                 cycle_tgt_ids = docs_ids
                 labels = move_to_cuda(ratings - 1)
 
@@ -251,7 +254,7 @@ class Summarizer(object):
                     retain_graph = (clf_optimizer is not None) or (sum_optimizer is not None)
                     (stats['adv_gen_loss']).backward(retain_graph=retain_graph)
             else:
-                output = self.sum_model(docs_ids, labels,
+                output = self.sum_model(filtered_doc_ids, labels, docs_ids,
                                         cycle_tgt_ids=cycle_tgt_ids,
                                         extract_summ_ids=extract_summ_ids,
                                         tau=cur_tau,
