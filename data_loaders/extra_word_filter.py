@@ -1,4 +1,5 @@
 from gensim.corpora import Dictionary
+import string
 
 
 class ExtraWordFilter(object):
@@ -16,8 +17,8 @@ class ExtraWordFilter(object):
 
     def transform(self, docs):
         segmented_docs = [[doc.split() for doc in item] for item in docs]
-        transformed_docs = [[" ".join([word for word in doc if word.lower() in self.dct.token2id.keys()]) for doc in
-                             item] for item in segmented_docs]
+        transformed_docs = [[" ".join([word for word in doc if word.lower() in self.dct.token2id.keys()
+                                       or word in string.punctuation]) for doc in item] for item in segmented_docs]
         return transformed_docs
 
     def fit_transform(self, docs, no_above, **kwargs):

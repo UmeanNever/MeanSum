@@ -24,6 +24,9 @@ class MyPytorchDataset(Dataset):
             if subset:
                 new_size = max(int(len(self.reviews) * subset), 1)
                 self.reviews = self.reviews[:new_size]
+            self.n = len(self.reviews)
+            self.filtered_reviews = self.reviews
+            self.topwords = [''] * self.n
         else:
             df = pd.read_csv(self.ds_conf.csv_path)
             for i, column_name in enumerate(df.columns[1:]):
@@ -34,17 +37,23 @@ class MyPytorchDataset(Dataset):
             if subset:
                 new_size = max(int(len(self.reviews) * subset), 1)
                 self.reviews = self.reviews[:new_size]
-        self.n = len(self.reviews)
-        if split != 'lm':
+            self.n = len(self.reviews)
             self.extra_word_filter = ExtraWordFilter()
             self.filtered_reviews = self.extra_word_filter.fit_transform(self.reviews, no_above=0.1, no_below=1)
-        else:
-            self.filtered_reviews = self.reviews
+            if hasattr(self.ds_conf, 'topword_path'):
+                with open(self.ds_conf.topword_path, 'r', encoding='utf8') as f:
+                    self.topwords = f.readlines()
+                assert len(self.topwords) == len(df.columns)-1, \
+                    "Topword dimension {} mismatch topic sentence dimension {}".format(len(self.topwords),
+                                                                                       len(df.columns)-1)
+            else:
+                self.topwords = [''] * self.n
 
     def __getitem__(self, idx):
         texts = SummDataset.concat_docs(self.reviews[idx], edok_token=True)
         filtered_texts = SummDataset.concat_docs(self.filtered_reviews[idx], edok_token=True)
-        return texts, 1, {'Topic': self.id_to_key[idx], 'Filtered_Text': filtered_texts}
+        return texts, 1, {'Topic': self.id_to_key[idx], 'Filtered_Text': filtered_texts,
+                          'Topwords': self.topwords[idx]}
 
     def __len__(self):
         return self.n
@@ -82,5 +91,3 @@ class MyDataset(SummReviewDataset):
         else:
             loader = DataLoader(ds, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
         return loader
-
-
