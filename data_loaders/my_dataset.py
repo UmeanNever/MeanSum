@@ -33,7 +33,7 @@ class MyPytorchDataset(Dataset):
                 value = df[column_name].values
                 self.reviews.append(value[:n_reviews])
                 self.key_to_id[column_name] = i
-                self.id_to_key[i] = column_name
+                self.id_to_key[i] = column_name.split(" ")[-1]
             if subset:
                 new_size = max(int(len(self.reviews) * subset), 1)
                 self.reviews = self.reviews[:new_size]
@@ -53,7 +53,7 @@ class MyPytorchDataset(Dataset):
         texts = SummDataset.concat_docs(self.reviews[idx], edok_token=True)
         filtered_texts = SummDataset.concat_docs(self.filtered_reviews[idx], edok_token=True)
         return texts, 1, {'Topic': self.id_to_key[idx], 'Filtered_Text': filtered_texts,
-                          'Topwords': self.topwords[idx]}
+                          'Topwords': self.topwords[int(self.id_to_key[idx])-1]}
 
     def __len__(self):
         return self.n
